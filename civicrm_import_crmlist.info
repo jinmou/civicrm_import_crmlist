@@ -1,0 +1,5 @@
+name = civicrm_import_crmlist
+description = Support to import CiviCRM contact by contact_id or external_id
+core = 6.x
+version = 6.x-1.0
+dependencies[] = civicrm
