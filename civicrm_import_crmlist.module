@@ -1,5 +1,13 @@
 <?php
 
+/** Include PHPExcel */
+require_once 'Classes/PHPExcel.php';
+/** Include PHPExcel_IOFactory */
+require_once 'Classes/PHPExcel/IOFactory.php';
+require_once 'Classes/PHPExcel/Writer/Excel2007.php';
+//module_load_include('php', '', 'PHPExcel');
+
+
 /**
  * Implementation of hook_menu().
  */
@@ -8,93 +16,127 @@ function civicrm_import_crmlist_menu(){
   return array(
     'admin/settings/civicrm_import_crmlist' => array(
       'title'            => 'civicrm_import_crmlist',
-      'access arguments' => array('import contacts'),
+      'access arguments' => array('access content'), //array('import contacts'),
       'page callback'    => 'drupal_get_form',
-      'page arguments'    => array('civicrm_import_crmlist_settings'),
+      'page arguments'   => array('civicrm_import_crmlist_settings'),// 為什麼一定要 xxx_settings??
+      'type'             => MENU_CALLBACK,
     )
   );
 }
 
-function civicrm_import_crmlist_settings(){
+/**
+ * Implementation of hook_theme().
+ */
+function civicrm_import_crmlist_settings_theme() {
+  return array(
+    'civicrm_import_crmlist_settings' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+function civicrm_import_crmlist_settings($form_state){
+  
+
+  $form['#theme'] = 'civicrm_import_crmlist_settings';
+
+  // jinmou: important! ==> to get uploaded file info.
   $form['#attributes'] = array('enctype' => "multipart/form-data");
-  //'upload' will be used in file_check_upload()
-  $form['option'] = array(
-    '#type' => 'radios',
-    '#required' => true,
-    '#title' => t('Primary ID'),
-    '#options' => array('contact_id' => t('Contact ID'), 'external_identifier' => t('External ID')),
-  );
-  $form['type'] = array(
-    '#type' => 'radios',
-    '#required' => true,
-    '#title' => t('Type'),
-    '#options' => array('tag' => t('Tag'), 'group' => t('Group')),
-  );
-  $form['multi_separator'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Multiple tag / group separator'),
-    '#default_value' => '|',
-    '#description' => t('You can fill in multiple value separator when import multiple tags/group in on cell. Empty means disable thie feature. It will import any cell as one tag/group.'),
-  );
+
   $form['upload'] = array(
     '#type' => 'file',
     '#title' => t("Import file"),
-    '#description' => t('Upload your csv file here, current only support id / tag or id / group, 2 column table.'),
+    '#description' => t('Upload your excel(xls/xlsx) file here.'),
   );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import'),
+    '#default_value' => '',
   );
+
+  // Form ´value´ : Save form_state info. to form 	~jinmou 
+  $form['element'] = array
+  (
+     '#type' => 'value',
+     '#value' => isset($form_state['values']['scheme']) ? $form_state['values']['scheme'] : FALSE,
+  );
+  
+  // when the callback function is called more than once (i.e. when the template is chosen and submitted)
+  if ($form_state['values']['scheme'])
+  {
+dpm(456);
+  }
+
   return $form;
 }
 
-/*
-function civicrm_import_crmlist_settings_validate($form, &$form_state){
+
+function theme_civicrm_import_crmlist_settings($form){
+dpm(12345);
 }
-*/
+
+/*function civicrm_import_crmlist_settings_validate($form, &$form_state){
+
+}*/
+
 
 function civicrm_import_crmlist_settings_submit($form, &$form_state){
-  civicrm_initialize(TRUE);
-  require_once("api/v2/Contact.php");
-  require_once("api/v2/Group.php");
-  require_once("api/v2/Tag.php");
-  require_once("api/v2/GroupContact.php");
-  require_once("api/v2/EntityTag.php");
+   set_time_limit(600); //何用？
 
-  set_time_limit(600);
+//error_reporting(E_ALL);
 
-  $separator = $form_state['values']['multi_separator'];
-  if($file = file_save_upload('upload')) {
-    $fd = fopen($file->filepath, "rb");
-    if (!$fd) {
-      return FALSE;
-    }
-    else{
-      while (($data = fgetcsv($fd, 0, ",")) !== FALSE) {
-        if(!$row){
-          $title = $data;
-        }
-        elseif(is_numeric($data[0])){
-          if($separator){
-            $import = explode($separator, $data[1]);
-            foreach($import as $k=>$v){
-              if(!$v) unset($import[$k]);
-              else $import[$k] = trim($v);
-            }
-          }
-          else{
-            $import = array(trim($data[1]));
-          }
-          if(!empty($import)){
-            civicrm_import_group_tag($data[0], $import, $form_state['values']['type'], $form_state['values']['option']);
-          }
-        }
-        $row++;
-      } 
-    }
-  }
-  return ;
+   // Get uploaded file info.	
+   $file = file_save_upload('upload');
+	//dpm($file->filepath);
+	//$file->filepath	
+   
+   date_default_timezone_set('Asia/Taipei');
+
+   if (!file_exists($file->filepath)) {
+	exit("file does not exist!!!" . PHP_EOL);
+   }
+
+dpm( date('H:i:s') );
+dpm("Load file");
+   $objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
+
+   // Get highest row & column
+   $objWorksheet = $objPHPExcel->getActiveSheet(); // Number
+
+   $highestRow = $objWorksheet->getHighestRow(); // English Letter
+
+   $highestColumn = $objWorksheet->getHighestColumn();
+   $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
+dpm($highestRow);
+dpm($highestColumnIndex);
+
+   // Save contents to 2-D array
+   for ($row = 1; $row <= $highestRow; ++$row) {
+//dpm($row);
+      for ($col = 0; $col <= $highestColumnIndex; ++$col) {
+         $crmContent[$row][$col] = $objWorksheet->getCellByColumnAndRow($col, $row)->getValue();
+//dpm( $objWorksheet->getCellByColumnAndRow($col, $row)->getValue()); 
+      }
+   }
+
+dpm(" Write to Excel2007 format");
+   $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+   $objWriter->save(str_replace('.module', '.xlsx', __FILE__));
+//echo date('H:i:s') , " File written to " , str_replace('.module', '.xlsx', __FILE__) , PHP_EOL;
+
+
+// Echo memory peak usage
+//echo date('H:i:s') , " Peak memory usage: " , (memory_get_peak_usage(true) / 1024 / 1024) , " MB" , PHP_EOL;
+
+// Echo done
+dpm(" Done writing files");
+
+  
+  return true;
 }
+
+/*
 // this will place civicrm api function.
 function civicrm_import_crmlist($id, $import, $type, $main_id = 'contact_id'){
   static $exists;
@@ -172,5 +214,5 @@ function civicrm_import_crmlist($id, $import, $type, $main_id = 'contact_id'){
       civicrm_entity_tag_add($params_sub);
     }
   }
-}
+}*/
 
