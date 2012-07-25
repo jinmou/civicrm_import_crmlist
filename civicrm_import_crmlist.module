@@ -35,43 +35,126 @@ function civicrm_import_crmlist_settings_theme() {
   );
 }
 
-function civicrm_import_crmlist_settings($form_state){
-  
+function civicrm_import_crmlist_settings($form_state){  
+   if (!$form_state['storage']['step']) 
+      $form_state['storage']['step'] = 1;
 
-  $form['#theme'] = 'civicrm_import_crmlist_settings';
+   $form_state['values'] = $form_state['storage']['values'];
+   //drupal_set_title('Multistep example - step '. $form_state['storage']['step'] . ' of '. STEPS);
 
-  // jinmou: important! ==> to get uploaded file info.
-  $form['#attributes'] = array('enctype' => "multipart/form-data");
+   $form = array();
+   
+   switch($form_state['storage']['step']) {
+      case 1:
+	 // jinmou: important! ==> to get uploaded file info.
+  	 $form['#attributes'] = array('enctype' => "multipart/form-data");
 
-  $form['upload'] = array(
-    '#type' => 'file',
-    '#title' => t("Import file"),
-    '#description' => t('Upload your excel(xls/xlsx) file here.'),
-  );
+   	 $form['upload'] = array(
+    	    '#type' => 'file',
+    	    '#title' => t("Import file"),
+            '#description' => t('Upload your excel(xls/xlsx) file here.'),
+  	 );
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Import'),
-    '#default_value' => '',
-  );
+	 $form['submit'] = array(
+	   '#type' => 'submit',
+	   '#value' => t('Import'),
+	   '#default_value' => '',
+  	  ); 
+      break;
 
-  // Form ´value´ : Save form_state info. to form 	~jinmou 
-  $form['element'] = array
-  (
-     '#type' => 'value',
-     '#value' => isset($form_state['values']['scheme']) ? $form_state['values']['scheme'] : FALSE,
-  );
-  
-  // when the callback function is called more than once (i.e. when the template is chosen and submitted)
-  if ($form_state['values']['scheme'])
-  {
-dpm(456);
-  }
+      case 2:
+	 //$form_state['storage']['crmlist']
+	 $highestCol = $form_state['storage']['ColNum'];
+	  for ($index = 1; $index <= $highestCol; ++$index) {
+		 $form[$index] = array(
+			  '#title' => t('欄名稱'),
+			  '#type' => 'textfield',
+			  //'#description' => 'Tell me all about your life',
+			  '#default_value' => $form_state['storage']['crmlist'][$index-1][1],
+			  //'#rows' => 1,
+			  //'#cols' => 1,
+			  '#disabled'=> TRUE,
+			  '#resizable' => TRUE,
+			  '#prefix' => '<table><tr><td>',
+	                  '#suffix' => '</td>',
+			  '#size' => 10,	
+			);
+		 
+		 $form[$index+100] = array(
+			  '#title' => t('匯入資料（第一列）'),
+			  '#type' => 'textfield',
+			  //'#description' => 'Tell me all about your life',
+			  '#default_value' => $form_state['storage']['crmlist'][$index-1][2],
+			  //'#rows' => 1,
+			  //'#cols' => 1,
+			  '#disabled'=> TRUE,
+			  '#resizable' => TRUE,
+			  '#prefix' => '<td>',
+	                  '#suffix' => '</td>',
+			  '#size' => 40,	
+			);
 
-  return $form;
+		 $form[$index+200] = array(
+			  '#title' => t('匯入資料（第二列）'),
+			  '#type' => 'textfield',
+			  //'#description' => 'Tell me all about your life',
+			  '#default_value' => $form_state['storage']['crmlist'][$index-1][3],
+			  //'#rows' => 1,
+			  //'#cols' => 1,
+			  '#disabled'=> TRUE,
+			  '#resizable' => TRUE,
+			  '#prefix' => '<td>',
+	                  '#suffix' => '</td>',
+			  '#size' => 40,
+			);
+
+		 //$sindex = $index + $highestCol +1;
+		 $schemes = array('',
+     			'Name',
+     			'Email',
+     			'B-Day',
+			'Mobil',
+			'Tel',	
+			'ID',			
+			'Address',	
+		 );
+		 
+ 		 // ´select´ form
+	     	 $form[$index+300] = array(
+			  '#title' => t('與CiviCRM欄位配對'),
+			  '#type' => 'select',
+			  '#options' => $schemes,
+			  '#default_value' => '',
+			  '#prefix' => '<td>',
+	                  '#suffix' => '</td></tr></table>',
+			);
+	  } // end for loop
+
+		 $form['confirm'] = array(
+			   '#type' => 'submit',
+			   '#value' => t('Confirm'),
+			   '#default_value' => '',
+		  	  ); 
+      break;
+
+      case 3:
+	 $form['finalstage'] = array(
+			  '#title' => t('完成'),
+			  '#type' => 'textfield',
+			  //'#description' => 'Tell me all about your life',
+			  '#default_value' => '請再次核對資料',
+			  //'#rows' => 1,
+			  //'#cols' => 1,
+			  '#disabled'=> TRUE,
+			  '#resizable' => TRUE,
+			);
+      break;		
+   } // End switch
+   return $form;
 }
 
 
+// 就是不會被呼叫??????
 function theme_civicrm_import_crmlist_settings($form){
 dpm(12345);
 }
@@ -82,137 +165,104 @@ dpm(12345);
 
 
 function civicrm_import_crmlist_settings_submit($form, &$form_state){
-   set_time_limit(600); //何用？
+	set_time_limit(600); //何用？
 
-//error_reporting(E_ALL);
+	// multistep processing 
+	if (!$form_state['storage']['values']) 
+		$form_state['storage']['values'] = array();
+	
+	$form_state['storage']['step']++;
 
-   // Get uploaded file info.	
-   $file = file_save_upload('upload');
-	//dpm($file->filepath);
-	//$file->filepath	
-   
-   date_default_timezone_set('Asia/Taipei');
+//dpm($form_state['storage']['step']);
 
-   if (!file_exists($file->filepath)) {
-	exit("file does not exist!!!" . PHP_EOL);
-   }
+	if ($form_state['storage']['step'] == 2) // Second page: Retrieve uploaded Excel file 
+	{
+	   // Clear the storage and rebuild so that the form doesn't rebuild, and the #redirect works
+	   $form_state['rebuild'] = TRUE;
+	   //unset($form_state['storage']);
 
+	   // Get uploaded file info.	
+	   $file = file_save_upload('upload');
+	   if (!file_exists($file->filepath)) {
+		exit("file does not exist!!!" . PHP_EOL);
+	   }
+
+date_default_timezone_set('Asia/Taipei');
 dpm( date('H:i:s') );
 dpm("Load file");
-   $objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
 
-   // Get highest row & column
-   $objWorksheet = $objPHPExcel->getActiveSheet(); // Number
-
-   $highestRow = $objWorksheet->getHighestRow(); // English Letter
-
-   $highestColumn = $objWorksheet->getHighestColumn();
-   $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
+	   	// Create PHPExcel object
+	   	$objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
+	   	// Get active worksheet highest row & column
+	   	$objWorksheet = $objPHPExcel->getActiveSheet(); 
+		// Get Row and Column boundry
+		$highestRow = $objWorksheet->getHighestRow(); 	// Number
+		$highestColumn = $objWorksheet->getHighestColumn();  // English Letter
+		$highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
 dpm($highestRow);
 dpm($highestColumnIndex);
+	   
+	   	// Save the info. to form_state
+	   	$form_state['storage']['RowNum'] = $highestRow;
+	   	$form_state['storage']['ColNum'] = $highestColumnIndex;
+	   	$form_state['storage']['crmlist'] = array();
 
-   // Save contents to 2-D array
-   for ($row = 1; $row <= $highestRow; ++$row) {
-//dpm($row);
-      for ($col = 0; $col <= $highestColumnIndex; ++$col) {
-         $crmContent[$row][$col] = $objWorksheet->getCellByColumnAndRow($col, $row)->getValue();
-//dpm( $objWorksheet->getCellByColumnAndRow($col, $row)->getValue()); 
-      }
-   }
+	   	// Save contents to 2-D array
+	   	for ($col = 0; $col <= $highestColumnIndex; ++$col){
+	      		for ($row = 1; $row <= $highestRow; ++$row) 	
+	      		{
+		 		$crmContent[$col][$row] = $objWorksheet->getCellByColumnAndRow($col, $row)->getValue();
+		 		$form_state['storage']['crmlist'][$col][$row] = $crmContent[$col][$row];
+//dpm($form_state['storage']['crmlist'][$col][$row]);
+	      		}
+	   	}
+	} // End if--step = 2
 
+	// Process the data type user selected and call the string process functions
+	if ($form_state['storage']['step'] == 3) // Final page: User chose item and process the info.
+	{
+	   	$objPHPExcel = new PHPExcel();
+		$objWorksheet = $objPHPExcel->getActiveSheet(); 
+//dpm($highestColumnIndex);
+
+		$colNum = $form_state['storage']['ColNum'];
+		$rowNum = $form_state['storage']['RowNum'];
+dpm($colNum);
+dpm($rowNum);
+	
+		$rCol=0;
+		$rRow=0;
+		$wCol=0;
+		$wRow=0;
+		for ($col = 0; $col <= $colNum; ++$col) {
+			$index = 301 + $col;
+	        	$item = $form_state['values'][$index]; // $item: 0:Nothing; 1:Name; 2:Email; 3:B-day; 4:mobil; 5:phones; 6:ID#; 7:Address 
+
+			if ($item>0)
+			{
+				$rCol++;
+
+				//===================================================	        
+				// for Albert: call specific string process function input:$form_state['storage']['crmlist'][$col]
+				// input:$form_state['storage']['crmlist'][$col] : one column
+				// return: one column (maybe one correct & and one wrong column)
+				// Temperary test
+				$test[$rCol] = $form_state['storage']['crmlist'][$col];
+				//===================================================	
+
+				for ($row = 1; $row <= $rowNum; ++$row){
+					$objWorksheet->setCellValueByColumnAndRow($rCol-1, $row, $test[$rCol][$row]);
+				} // End row for loop
+			} // End if 
+	   	} // End column for loop
+
+		// Write to the Excel file
 dpm(" Write to Excel2007 format");
-   $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-   $objWriter->save(str_replace('.module', '.xlsx', __FILE__));
-//echo date('H:i:s') , " File written to " , str_replace('.module', '.xlsx', __FILE__) , PHP_EOL;
-
-
-// Echo memory peak usage
-//echo date('H:i:s') , " Peak memory usage: " , (memory_get_peak_usage(true) / 1024 / 1024) , " MB" , PHP_EOL;
-
-// Echo done
-dpm(" Done writing files");
-
-  
-  return true;
+	      	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+	      	$objWriter->save(str_replace('.module', '.xlsx', __FILE__));
+dpm(" Done writing files");	
+	} // End if--step = 3
+	return true;
 }
 
-/*
-// this will place civicrm api function.
-function civicrm_import_crmlist($id, $import, $type, $main_id = 'contact_id'){
-  static $exists;
-
-  // find out contact_id
-  if($main_id == 'contact_id'){
-    $params = array('contact_id' => $id);
-  }
-  else{
-    $params = array($main_id => $id);
-  }
-  $retrieved = &civicrm_contact_get( $params );
-
-  if(civicrm_error($retrieved) || empty($retrieved)){
-    drupal_set_message("Can't not find contact id: $id", 'error');
-    $id = NULL;
-    return;
-  }
-  else{
-    $id = key($retrieved);
-  }
-  
-  foreach($import as $text){
-    if(!$exists[$text]){
-      // add tag or group base on $type
-      $res = array();
-      if($type == 'group'){
-        // dedupe
-        $params = array('title'=>$text);
-        $result = civicrm_group_get($params);
-        if(civicrm_error($result)){
-          $params = array('title' => $text,'is_active' => 1 );
-          $res = civicrm_group_add($params);
-          if(civicrm_error($res)){
-            drupal_set_message($res['error_message'], 'error');
-            continue;
-          }
-          else{
-            $exists[$text] = $res['result']; 
-          
-          }
-        }
-        else{
-          $exists[$text] = key($result);
-        }
-      }
-      else{
-        $params = array('name' => $text);
-        $result =& civicrm_tag_get($params);
-        if ( civicrm_error ( $result )) {
-          $params = array('name' => $text, 'is_active' => 1,'domain_id' => 1);
-          $res = civicrm_tag_create($params);
-          if(civicrm_error($res)){
-            drupal_set_message($res['error_message'], 'error');
-            continue;
-          }
-          else{
-            $exists[$text] = $res['tag_id'];
-          }
-        }
-        else{
-          $exists[$text] = $result['id'];
-        }
-      }
-    }
-
-    // now import contact / tag relationship
-    $params_sub = array('contact_id' => $id);
-    if ($type == 'group') {
-      $params_sub['group_id'] = $exists[$text];
-      civicrm_group_contact_add($params_sub);
-    }
-    else {
-      $params_sub['tag_id'] = $exists[$text];
-      civicrm_entity_tag_add($params_sub);
-    }
-  }
-}*/
 
