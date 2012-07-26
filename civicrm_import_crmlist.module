@@ -27,13 +27,15 @@ function civicrm_import_crmlist_menu(){
 /**
  * Implementation of hook_theme().
  */
-function civicrm_import_crmlist_settings_theme() {
+
+function civicrm_import_crmlist_theme() {
   return array(
     'civicrm_import_crmlist_settings' => array(
       'arguments' => array('form' => NULL),
-    ),
+    ),	
   );
 }
+
 
 function civicrm_import_crmlist_settings($form_state){  
    if (!$form_state['storage']['step']) 
@@ -67,12 +69,9 @@ function civicrm_import_crmlist_settings($form_state){
 	 $highestCol = $form_state['storage']['ColNum'];
 	  for ($index = 1; $index <= $highestCol; ++$index) {
 		 $form[$index] = array(
-			  '#title' => t('欄名稱'),
+			  '#title' => t('Item'),
 			  '#type' => 'textfield',
-			  //'#description' => 'Tell me all about your life',
 			  '#default_value' => $form_state['storage']['crmlist'][$index-1][1],
-			  //'#rows' => 1,
-			  //'#cols' => 1,
 			  '#disabled'=> TRUE,
 			  '#resizable' => TRUE,
 			  '#prefix' => '<table><tr><td>',
@@ -81,12 +80,9 @@ function civicrm_import_crmlist_settings($form_state){
 			);
 		 
 		 $form[$index+100] = array(
-			  '#title' => t('匯入資料（第一列）'),
+			  '#title' => t('Import Data（First row）'),
 			  '#type' => 'textfield',
-			  //'#description' => 'Tell me all about your life',
 			  '#default_value' => $form_state['storage']['crmlist'][$index-1][2],
-			  //'#rows' => 1,
-			  //'#cols' => 1,
 			  '#disabled'=> TRUE,
 			  '#resizable' => TRUE,
 			  '#prefix' => '<td>',
@@ -94,21 +90,6 @@ function civicrm_import_crmlist_settings($form_state){
 			  '#size' => 40,	
 			);
 
-		 $form[$index+200] = array(
-			  '#title' => t('匯入資料（第二列）'),
-			  '#type' => 'textfield',
-			  //'#description' => 'Tell me all about your life',
-			  '#default_value' => $form_state['storage']['crmlist'][$index-1][3],
-			  //'#rows' => 1,
-			  //'#cols' => 1,
-			  '#disabled'=> TRUE,
-			  '#resizable' => TRUE,
-			  '#prefix' => '<td>',
-	                  '#suffix' => '</td>',
-			  '#size' => 40,
-			);
-
-		 //$sindex = $index + $highestCol +1;
 		 $schemes = array('',
      			'Name',
      			'Email',
@@ -121,7 +102,7 @@ function civicrm_import_crmlist_settings($form_state){
 		 
  		 // ´select´ form
 	     	 $form[$index+300] = array(
-			  '#title' => t('與CiviCRM欄位配對'),
+			  '#title' => t('Confirm the item category'),
 			  '#type' => 'select',
 			  '#options' => $schemes,
 			  '#default_value' => '',
@@ -139,12 +120,9 @@ function civicrm_import_crmlist_settings($form_state){
 
       case 3:
 	 $form['finalstage'] = array(
-			  '#title' => t('完成'),
+			  '#title' => t('Done'),
 			  '#type' => 'textfield',
-			  //'#description' => 'Tell me all about your life',
-			  '#default_value' => '請再次核對資料',
-			  //'#rows' => 1,
-			  //'#cols' => 1,
+			  '#default_value' => 'Please check your data',
 			  '#disabled'=> TRUE,
 			  '#resizable' => TRUE,
 			);
@@ -154,9 +132,9 @@ function civicrm_import_crmlist_settings($form_state){
 }
 
 
-// 就是不會被呼叫??????
+
 function theme_civicrm_import_crmlist_settings($form){
-dpm(12345);
+//dpm(12345);
 }
 
 /*function civicrm_import_crmlist_settings_validate($form, &$form_state){
@@ -173,23 +151,17 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 	
 	$form_state['storage']['step']++;
 
-//dpm($form_state['storage']['step']);
 
 	if ($form_state['storage']['step'] == 2) // Second page: Retrieve uploaded Excel file 
 	{
-	   // Clear the storage and rebuild so that the form doesn't rebuild, and the #redirect works
-	   $form_state['rebuild'] = TRUE;
-	   //unset($form_state['storage']);
-
-	   // Get uploaded file info.	
-	   $file = file_save_upload('upload');
-	   if (!file_exists($file->filepath)) {
-		exit("file does not exist!!!" . PHP_EOL);
-	   }
-
-date_default_timezone_set('Asia/Taipei');
-dpm( date('H:i:s') );
-dpm("Load file");
+		// Clear the storage and rebuild so that the form doesn't rebuild, and the #redirect works
+	        $form_state['rebuild'] = TRUE;
+	   
+	        // Get uploaded file info.	
+	        $file = file_save_upload('upload');
+	        if (!file_exists($file->filepath)) {
+		    	exit("file does not exist!!!" . PHP_EOL);
+	   	}
 
 	   	// Create PHPExcel object
 	   	$objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
@@ -199,8 +171,6 @@ dpm("Load file");
 		$highestRow = $objWorksheet->getHighestRow(); 	// Number
 		$highestColumn = $objWorksheet->getHighestColumn();  // English Letter
 		$highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
-dpm($highestRow);
-dpm($highestColumnIndex);
 	   
 	   	// Save the info. to form_state
 	   	$form_state['storage']['RowNum'] = $highestRow;
@@ -213,7 +183,6 @@ dpm($highestColumnIndex);
 	      		{
 		 		$crmContent[$col][$row] = $objWorksheet->getCellByColumnAndRow($col, $row)->getValue();
 		 		$form_state['storage']['crmlist'][$col][$row] = $crmContent[$col][$row];
-//dpm($form_state['storage']['crmlist'][$col][$row]);
 	      		}
 	   	}
 	} // End if--step = 2
@@ -223,31 +192,26 @@ dpm($highestColumnIndex);
 	{
 	   	$objPHPExcel = new PHPExcel();
 		$objWorksheet = $objPHPExcel->getActiveSheet(); 
-//dpm($highestColumnIndex);
 
 		$colNum = $form_state['storage']['ColNum'];
 		$rowNum = $form_state['storage']['RowNum'];
-dpm($colNum);
-dpm($rowNum);
 	
 		$rCol=0;
 		$rRow=0;
 		$wCol=0;
 		$wRow=0;
+
 		for ($col = 0; $col <= $colNum; ++$col) {
 			$index = 301 + $col;
 	        	$item = $form_state['values'][$index]; // $item: 0:Nothing; 1:Name; 2:Email; 3:B-day; 4:mobil; 5:phones; 6:ID#; 7:Address 
 
-			if ($item>0)
+			if ($item>0) // User does select
 			{
 				$rCol++;
-
-				//===================================================	        
-				// for Albert: call specific string process function input:$form_state['storage']['crmlist'][$col]
-				// input:$form_state['storage']['crmlist'][$col] : one column
-				// return: one column (maybe one correct & and one wrong column)
+				
 				// Temperary test
-				$test[$rCol] = $form_state['storage']['crmlist'][$col];
+				$test[$rCol] = $form_state['storage']['crmlist'][$col];			
+				ValidateCustomerData($item, $form_state['storage']['crmlist'][$col]);
 				//===================================================	
 
 				for ($row = 1; $row <= $rowNum; ++$row){
@@ -257,12 +221,14 @@ dpm($rowNum);
 	   	} // End column for loop
 
 		// Write to the Excel file
-dpm(" Write to Excel2007 format");
 	      	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 	      	$objWriter->save(str_replace('.module', '.xlsx', __FILE__));
-dpm(" Done writing files");	
 	} // End if--step = 3
 	return true;
 }
 
-
+// input:$form_state['storage']['crmlist'][$col] : one column
+// output: 1-D array
+function ValidateCustomerData($item, $colCustomer){
+	
+}
