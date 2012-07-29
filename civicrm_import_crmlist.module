@@ -256,8 +256,17 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 	   	} // End column for loop
 
 		// Write to the Excel file
-	      	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-	      	$objWriter->save(str_replace('.module', '.xlsx', __FILE__));
+/*	      	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+	      	$objWriter->save(str_replace('.module', '.xlsx', __FILE__));*/
+
+		// Redirect output to a client’s web browser (Excel5)
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment;filename="civicrm_Contactlist.xls"');
+		header('Cache-Control: max-age=0');
+
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+		$objWriter->save('php://output');
+		exit;
 	} // End if--step = 3
 	return true;
 }
