@@ -11,6 +11,9 @@
  */
 function cvalidate_name($str) {
   $str = _cvalidate_filter($str, 'trim');
+  if (empty($str)) {
+    return FALSE;
+  }
   if (preg_match("/[a-zA-Z]/", $str)) { // check for english name
     if (preg_match("/[,]/", $str)) { // has comma will be reverse
       // $name = array_reverse(preg_split("/[\s,]+/", $str));
@@ -44,6 +47,9 @@ function cvalidate_name($str) {
  */
 function cvalidate_email($email, $checkDNS = FALSE) {
   $email = _cvalidate_filter($email);
+  if (empty($email)) {
+    return FALSE;
+  }
   $valid = (
   function_exists('filter_var') 
   and filter_var($email, FILTER_VALIDATE_EMAIL)) || 
@@ -82,6 +88,9 @@ function cvalidate_email($email, $checkDNS = FALSE) {
  */
 function cvalidate_birthday($str) {
   $str = _cvalidate_filter($str);
+  if (empty($str)) {
+    return FALSE;
+  }
   if (!strtotime($str)) {
     return FALSE;
   }
@@ -94,6 +103,9 @@ function cvalidate_birthday($str) {
  */
 function cvalidate_mobile($str) {
   $str = _cvalidate_filter($str);
+  if (empty($str)) {
+    return FALSE;
+  }
   if (preg_match("/[-]/", $str)) { // check for english name
     $str = str_replace('-', '', $str);
   }
@@ -110,16 +122,21 @@ function cvalidate_mobile($str) {
 
 /**
  * Validating telephone number.
+ * @see http://countrycode.org/taiwan
  */
 function cvalidate_telephone($str) {
   $str = _cvalidate_filter($str);
-  if (preg_match("/[-]/", $str)) { // check for english name
+  if (empty($str)) {
+    return FALSE;
+  }
+  if (preg_match("/\-/", $str)) { // check for english name
     $str = str_replace('-', '', $str);
   }
-  if (preg_match("/[+886]/", $str)) {
-    $str = str_replace('+886', '02', $str);
+  if (preg_match("/\+886/", $str)) {
+    $str = str_replace('+886', '0', $str);
   }
-  if (strlen($str) != 10) {
+  $len = strlen($str);
+  if ($len < 9 || $len > 10) {
     return FALSE;
   }
   $phone = substr($str, 1, 9);
@@ -133,11 +150,10 @@ function cvalidate_telephone($str) {
  * @see http://home.csjh.tcc.edu.tw/phpbbinf/viewtopic.php?p=22564&sid=4b3146725041db9dcc43efe4cc821aae
  */
 function cvalidate_pid($pid) {
-  $pid = _cvalidate_filter($pid);
-  if (!$pid) {
-    return false;
+  $pid = strtoupper(_cvalidate_filter($pid));
+  if (empty($pid)) {
+    return FALSE;
   }
-  $pid = strtoupper(trim($pid));
   $ereg_pattern = "^[A-Z]{1}[12]{1}[[:digit:]]{8}$";
   if (!ereg($ereg_pattern, $pid)) {
     return false;
@@ -175,7 +191,13 @@ function cvalidate_address($full_address) {
   $returns['region'] = $data['3']->long_name;
 
   // if count zip 5 will separate to 3 + 2
-  $returns['zip'] = $data['6']->long_name;
+  if (preg_match("/^[0-9]{5}/", $full_address)) {
+    $returns['zip']['0'] = substr($full_address, 0, 3);
+    $returns['zip']['1'] = substr($full_address, 3, 2);
+  }
+  else {
+    $returns['zip'] = $data['6']->long_name;
+  }
   $returns['street'] = $data['1']->long_name;
   foreach ($returns as $item) {
     if (empty($item)) {
@@ -194,7 +216,7 @@ function cvalidate_address($full_address) {
  *   trim - trim left and right space
  */
 function _cvalidate_filter($str, $op = 'all') {
-  if (empty($op)) {
+  if (empty($str)) {
     return FALSE;
   }
   switch ($op) {
