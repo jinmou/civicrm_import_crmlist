@@ -17,10 +17,10 @@ function cvalidate_name($str) {
   if (preg_match("/[a-zA-Z]/", $str)) { // check for english name
     if (preg_match("/[,]/", $str)) { // has comma will be reverse
       // $name = array_reverse(preg_split("/[\s,]+/", $str));
-      $name = array_reverse(explode(',', $str));
+      $name = explode(',', $str);	
     }
     else { // has space
-      $name = preg_split("/[\s,]+/", $str);
+      $name = array_reverse(preg_split("/[\s,]+/", $str));
     }
     
   }
