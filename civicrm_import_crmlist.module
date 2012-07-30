@@ -226,20 +226,30 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 					case 7: // Address
 						// Fill in the first row (item name) first				
 						$objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'city');
-						$objWorksheet->setCellValueByColumnAndRow($fCol, 1, 'region');
-						$objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, 'zip');
-						$objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, 'street');
+						$objWorksheet->setCellValueByColumnAndRow($fCol  , 1, 'region');
+						$objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, 'zip code(3 digits)');
+						$objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, 'zip code(2 digits)');
+						$objWorksheet->setCellValueByColumnAndRow($fCol+3, 1, 'street');
 
 						for ($row = 2; $row <= $rowNum; ++$row){
 							$cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
 
 							$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent['city']);
 							$objWorksheet->setCellValueByColumnAndRow($fCol, $row, $cellContent['region']);
-							$objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']);
-							$objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, $cellContent['street']);
-						
+
+							if (is_array($cellContent['zip'])) // 5-digit zip code
+							{
+								$objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']['0']);
+								$objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, $cellContent['zip']['1']);
+							}
+							else // 3-digit zip code
+							{
+								$objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']);
+								$objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, '');
+							}
+							$objWorksheet->setCellValueByColumnAndRow($fCol+3, $row, $cellContent['street']);
 						} // End row for loop
-						$fCol = $fCol + 4;
+						$fCol = $fCol + 5;
 					break;
 					default:
 						// Fill in the first row(item name) first
