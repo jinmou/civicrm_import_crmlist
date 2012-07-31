@@ -82,6 +82,7 @@ function civicrm_import_crmlist_settings($form_state){
 			  '#size' => 10,	
 			);
 
+/*
 		 $form[$index+100] = array(
 			  '#title' => t('Import Data（First row）'),
 			  '#type' => 'textfield',
@@ -92,6 +93,8 @@ function civicrm_import_crmlist_settings($form_state){
 	                  '#suffix' => '</td>',
 			  '#size' => 40,	
 			);
+ */
+     $form['abc_'.$index]['#value'] = '<td>'.$form_state['storage']['crmlist'][$index-1][2].'</td>';
 
 		 $schemes = array('Don´t choose',
      			'Name',
@@ -138,6 +141,9 @@ function civicrm_import_crmlist_settings($form_state){
 
 function theme_civicrm_import_crmlist_settings($form){
 //dpm(12345);
+  // please read theme_table function 
+  // http://api.drupal.org/api/drupal/includes%21theme.inc/function/theme_table/6
+  // $output .= theme('table', $header, $rows);
 }
 
 /*function civicrm_import_crmlist_settings_validate($form, &$form_state){
