@@ -25,13 +25,22 @@ function cvalidate_name($str) {
     
   }
   else { // check for chinese name
-    $l_name = mb_substr($str, -2, 2, 'UTF-8');
-    $f_name = preg_split('/'.$l_name.'/', $str);
-    $name[] = $f_name[0];
-    $name[] = $l_name;
-  }
-  if (count($name) > 2) {
-    return FALSE;
+    $str = _cvalidate_filter($str);
+    $len = mb_strlen($str, 'UTF-8');
+
+    if ($len == 2) {
+      return array(mb_substr($str, 0, 1, 'UTF-8'), mb_substr($str, 1, 1, 'UTF-8'));
+    }
+    else if ($len == 3 || $len == 4) {
+      $l_name = mb_substr($str, -2, 2, 'UTF-8');
+      $f_name = preg_split('/'.$l_name.'/', $str);
+      $name[] = $f_name[0];
+      $name[] = $l_name;
+    }
+    else {
+      return FALSE;
+    }
+
   }
   foreach ($name as $key => $value) {
     $name[$key] = trim($value);
@@ -42,45 +51,36 @@ function cvalidate_name($str) {
 /**
  * Validating email format.
  * @see http://php.net/manual/en/function.checkdnsrr.php
- * ex: cvalidate_email('dreamerhyde@gmail.com', TRUE));
- * if $checkDNS is "TRUE", it will online to check this email.
  */
-function cvalidate_email($email, $checkDNS = FALSE) {
-  $email = _cvalidate_filter($email);
-  if (empty($email)) {
+function cvalidate_email($input, $checkDNS = FALSE) {
+  $email = _cvalidate_filter($input);
+  if (empty($email) || !preg_match("/@/", $email)) {
     return FALSE;
   }
-  $valid = (
-  function_exists('filter_var') 
-  and filter_var($email, FILTER_VALIDATE_EMAIL)) || 
-  (strlen($email) <= 320 
-    and @preg_match_all(
-    '/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?))'. 
-    '{255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?))'.
-    '{65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|'.
-    '(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22))'.
-    '(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|'.
-    '(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|'.
-    '(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})'.
-    '(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126})'.'{1,}'.
-    '(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|'.
-    '(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|'.
-    '(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::'.
-    '(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|'.
-    '(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|'.
-    '(?:(?!(?:.*[a-f0-9]:){5,})'.'(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::'.
-    '(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|'.
-    '(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|'.
-    '(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iD',
-      $email)
+  $email = explode('@', $email, 2);
+  $user_id = $email[0];
+  $user_domain = $email[1];
+  $total_domain = array(
+    'yahoo.com.tw',
+    'yahoo.com',
+    'gmail.com',
+    'hotmail.com',
+    'msn.com'
   );
-  if($valid) {
-    if( $checkDNS && ($domain = end(explode('@',$email, 2))) ) {
-      return checkdnsrr($domain . '.', 'MX');
-    }
-    return $email;
+  $similar = array();
+  foreach ($total_domain as $domain) {
+    similar_text($domain, $user_domain, $percent);
+    array_push($similar, array('domain' => $domain, 'percent' => $percent));
   }
-  return FALSE;
+  $token = NULL;
+  $count = count($similar);
+  for ($i = 0; $i < $count; $i++) {
+    if ($count && $similar[$i]['percent'] > $similar[$i + 1]['percent']) {
+      $similar[$i + 1] = $similar[$i];
+      $token = $similar[$i + 1];
+    }
+  }
+  return $token['percent'] > 90 ? $user_id . '@' . $token['domain'] : $input;
 }
 
 /**
@@ -226,10 +226,6 @@ function _cvalidate_filter($str, $op = 'all') {
       break;
     case 'trim':
       $str = trim($str);
-      break;
-    default:
-      $str = str_replace(' ', '', $str);
-      $str = str_replace('　', '', $str);
       break;
   }
   return $str;
