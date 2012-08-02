@@ -41,90 +41,78 @@ function civicrm_import_crmlist_theme() {
 
 
 function civicrm_import_crmlist_settings($form_state){  
-   if (!$form_state['storage']['step']) 
-      $form_state['storage']['step'] = 1;
+  drupal_set_title('List Validation');
 
-   $form_state['values'] = $form_state['storage']['values'];
-   //drupal_set_title('Multistep example - step '. $form_state['storage']['step'] . ' of '. STEPS);
+  if (!$form_state['storage']['step']) 
+    $form_state['storage']['step'] = 1;
 
-   $form = array();
+  $form_state['values'] = $form_state['storage']['values'];
+  //drupal_set_title('Multistep example - step '. $form_state['storage']['step'] . ' of '. STEPS);
+
+  $form = array();
    
-   switch($form_state['storage']['step']) {
-      case 1:
-	 // jinmou: important! ==> to get uploaded file info.
-  	 $form['#attributes'] = array('enctype' => "multipart/form-data");
+  switch($form_state['storage']['step']) {
+    case 1:
+      // jinmou: important! ==> to get uploaded file info.
+      $form['#attributes'] = array('enctype' => "multipart/form-data");
 
-   	 $form['upload'] = array(
-    	    '#type' => 'file',
-    	    '#title' => t("Import file"),
-            '#description' => t('Upload your excel(xls/xlsx) file here.'),
-  	 );
+      $form['step1']['#value'] = '<font size="2">STEP1:</font>';
 
-	 $form['submit'] = array(
-	   '#type' => 'submit',
-	   '#value' => t('Import'),
-	   '#default_value' => '',
+      $form['upload'] = array(
+        '#type' => 'file',
+    	'#title' => t("Upload"),
+        '#description' => t('Upload your excel(xls/xlsx) file here.'),
+        );
+
+	$form['submit'] = array(
+	  '#type' => 'submit',
+	  '#value' => t('Import'),
+	  '#default_value' => '',
   	  ); 
-      break;
+    break;
 
-      case 2:
-	 //$form_state['storage']['crmlist']
-	 $highestCol = $form_state['storage']['ColNum'];
-	  for ($index = 1; $index <= $highestCol; ++$index) {
-		 $form[$index] = array(
-			  '#title' => t('Item'),
-			  '#type' => 'textfield',
-			  '#default_value' => $form_state['storage']['crmlist'][$index-1][1],
-			  '#disabled'=> TRUE,
-			  '#resizable' => TRUE,
-			  '#prefix' => '<table><tr><td>',
-	                  '#suffix' => '</td>',
-			  '#size' => 10,	
-			);
+    case 2:
+      $form['step2']['#value'] = '<font size="2">STEP2:</font>';
+      //$form_state['storage']['crmlist']
+      $highestCol = $form_state['storage']['ColNum'];
+      $index = 0;
+      $form['title'.$index]['#value'] = '<table border=3><tr bgcolor=#cbf1bf align=center valign=center><td>Item name</td><td>First row</td><td>Choose the category</td></tr>';
 
-/*
-		 $form[$index+100] = array(
-			  '#title' => t('Import Data（First row）'),
-			  '#type' => 'textfield',
-			  '#default_value' => $form_state['storage']['crmlist'][$index-1][2],
-			  '#disabled'=> TRUE,
-			  '#resizable' => TRUE,
-			  '#prefix' => '<td>',
-	                  '#suffix' => '</td>',
-			  '#size' => 40,	
-			);
- */
-     $form['abc_'.$index]['#value'] = '<td>'.$form_state['storage']['crmlist'][$index-1][2].'</td>';
+      for ($index = 1; $index <= $highestCol; ++$index) {
+        $form['item_'.$index]['#value'] = '<tr align=center valign=center><td>'.$form_state['storage']['crmlist'][$index-1][1].'</td>';
 
-		 $schemes = array('Don´t choose',
-     			'Name',
-     			'Email',
-     			'B-Day',
-			'Mobil',
-			'Tel',	
-			'ID',			
-			'Address',	
-		 );
+        $form['firstrow_'.$index]['#value'] = '<td>'.$form_state['storage']['crmlist'][$index-1][2].'</td>';
+ 
+	$schemes = array('No action',
+     	  'Name',
+     	  'Email',
+     	  'BirthDay',
+	  'Mobil',
+	  'Telephone',	
+	  'Personal ID',			
+	  'Address',	
+	  );
 
- 		 // ´select´ form
-	     	 $form[$index+300] = array(
-			  '#title' => t('Confirm the item category'),
-			  '#type' => 'select',
-			  '#options' => $schemes,
-			  '#default_value' => '',
-			  '#prefix' => '<td>',
-	                  '#suffix' => '</td></tr></table>',
-			);
-	  } // end for loop
+	// ´select´ form
+        $form['select_'.$index] = array(
+	  '#type' => 'select',
+	  '#options' => $schemes,
+	  '#default_value' => '',
+	  '#prefix' => '<td>',
+	  '#suffix' => '</td></tr>',
+	  );
+      } // end for loop
 
-		 $form['confirm'] = array(
-			   '#type' => 'submit',
-			   '#value' => t('Confirm'),
-			   '#default_value' => '',
-		  	  ); 
-      break;
+      $index = $highestCol+1;
+      $form['title'.$index]['#value'] = '</table>';
+      $form['confirm'] = array(
+        '#type' => 'submit',
+	'#value' => t('Confirm'),
+	'#default_value' => '',
+	); 
+    break;
 
-      case 3:
+      /*case 3:
 	 $form['finalstage'] = array(
 			  '#title' => t('Done'),
 			  '#type' => 'textfield',
@@ -132,7 +120,7 @@ function civicrm_import_crmlist_settings($form_state){
 			  '#disabled'=> TRUE,
 			  '#resizable' => TRUE,
 			);
-      break;		
+      break;*/		
    } // End switch
    return $form;
 }
@@ -140,7 +128,6 @@ function civicrm_import_crmlist_settings($form_state){
 
 
 function theme_civicrm_import_crmlist_settings($form){
-//dpm(12345);
   // please read theme_table function 
   // http://api.drupal.org/api/drupal/includes%21theme.inc/function/theme_table/6
   // $output .= theme('table', $header, $rows);
@@ -152,187 +139,179 @@ function theme_civicrm_import_crmlist_settings($form){
 
 
 function civicrm_import_crmlist_settings_submit($form, &$form_state){
-	set_time_limit(600); //何用？
+  set_time_limit(600); 
 
-	// multistep processing 
-	if (!$form_state['storage']['values']) 
-		$form_state['storage']['values'] = array();
+  // multistep processing 
+  if (!$form_state['storage']['values']) 
+    $form_state['storage']['values'] = array();
+    
+  $form_state['storage']['step']++;
 
-	$form_state['storage']['step']++;
+  // Clear the storage and rebuild so that the form doesn't rebuild, and the #redirect works
+  $form_state['rebuild'] = TRUE;
 
-	// Clear the storage and rebuild so that the form doesn't rebuild, and the #redirect works
-	$form_state['rebuild'] = TRUE;
+  if ($form_state['storage']['step'] == 2) // Second page: Retrieve uploaded Excel file 
+  {
+    // Get uploaded file info.	
+    $file = file_save_upload('upload');
+    if (!file_exists($file->filepath)) {
+      exit("file does not exist!!!" . PHP_EOL);
+    }
+    // Create PHPExcel object
+    $objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
+    // Get active worksheet highest row & column
+    $objWorksheet = $objPHPExcel->getActiveSheet(); 
+    // Get Row and Column boundry
+    $highestRow = $objWorksheet->getHighestRow(); 	// Number
+    $highestColumn = $objWorksheet->getHighestColumn();  // English Letter
+    $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
 
-	if ($form_state['storage']['step'] == 2) // Second page: Retrieve uploaded Excel file 
-	{
-	        // Get uploaded file info.	
-	        $file = file_save_upload('upload');
-	        if (!file_exists($file->filepath)) {
-		    	exit("file does not exist!!!" . PHP_EOL);
-	   	}
+    // Save the info. to form_state
+    $form_state['storage']['RowNum'] = $highestRow;
+    $form_state['storage']['ColNum'] = $highestColumnIndex;
+    $form_state['storage']['crmlist'] = array();
 
-	   	// Create PHPExcel object
-	   	$objPHPExcel = PHPExcel_IOFactory::load($file->filepath);
-	   	// Get active worksheet highest row & column
-	   	$objWorksheet = $objPHPExcel->getActiveSheet(); 
-		// Get Row and Column boundry
-		$highestRow = $objWorksheet->getHighestRow(); 	// Number
-		$highestColumn = $objWorksheet->getHighestColumn();  // English Letter
-		$highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
+    // Save contents to 2-D array
+    for ($col = 0; $col <= $highestColumnIndex; ++$col){
+      for ($row = 1; $row <= $highestRow; ++$row){
+        // Retrieve original excel file data & store to form_state array
+        $cell = $objWorksheet->getCellByColumnAndRow($col, $row);
+        // Check if the cell value is Rich Text or plain text
+        $plainText = ($cell->getValue() instanceof PHPExcel_RichText) ? $cell->getValue()->getPlainText() : $cell->getValue();
+        $crmContent[$col][$row] = $plainText;
+        $form_state['storage']['crmlist'][$col][$row] = $crmContent[$col][$row];
+      }
+    }
+  } // End if--step = 2
 
-	   	// Save the info. to form_state
-	   	$form_state['storage']['RowNum'] = $highestRow;
-	   	$form_state['storage']['ColNum'] = $highestColumnIndex;
-	   	$form_state['storage']['crmlist'] = array();
+  // Process the data type user selected and call the string process functions
+  if ($form_state['storage']['step'] == 3){ // Final page: User chose item and process the info.
+    $objPHPExcel = new PHPExcel();
+    $objWorksheet = $objPHPExcel->getActiveSheet(); 
 
-	   	// Save contents to 2-D array
-	   	for ($col = 0; $col <= $highestColumnIndex; ++$col){
-	      		for ($row = 1; $row <= $highestRow; ++$row) 	
-	      		{
-				// Retrieve original excel file data & store to form_state array
-				$cell = $objWorksheet->getCellByColumnAndRow($col, $row);
-				// Check if the cell value is Rich Text or not
-				$plainText = ($cell->getValue() instanceof PHPExcel_RichText) ? $cell->getValue()->getPlainText() : $cell->getValue();
-				$crmContent[$col][$row] = $plainText;
-				$form_state['storage']['crmlist'][$col][$row] = $crmContent[$col][$row];
-	      		}
-	   	}
-	} // End if--step = 2
+    $colNum = $form_state['storage']['ColNum'];
+    $rowNum = $form_state['storage']['RowNum'];
 
-	// Process the data type user selected and call the string process functions
-	if ($form_state['storage']['step'] == 3) // Final page: User chose item and process the info.
-	{
-		$objPHPExcel = new PHPExcel();
-		$objWorksheet = $objPHPExcel->getActiveSheet(); 
+    $fCol=0;
+    for ($col = 0; $col <= $colNum; ++$col) {
+      $index = $col + 1;
+      $item = $form_state['values']['select_'.$index]; // $item: 0:Nothing; 1:Name; 2:Email; 3:B-day; 4:mobil; 5:phones; 6:ID#; 7:Address 
+      if ($item > 0){ // User does select at least one item			
+        $fCol++;
 
-		$colNum = $form_state['storage']['ColNum'];
-		$rowNum = $form_state['storage']['RowNum'];
+        switch($item) {
+          case 1:	// Name		
+            // Fill in the first row (item name) first				
+            $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'Family name');
+	    $objWorksheet->setCellValueByColumnAndRow($fCol, 1, 'First name');			
+	    for ($row = 2; $row <= $rowNum; ++$row){
+	      $cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
+	      if (!empty($form_state['storage']['crmlist'][$col][$row])){ // make sure the cell is not empty
+	        $cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
 
-		$fCol=0;
+		if ($cellContent){
+ 		  $objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent[0]);
+		  $objWorksheet->setCellValueByColumnAndRow($fCol, $row, $cellContent[1]);
+		}
+		else{ // If input data is not correct
+		  $cellContent = '@ERR-';
+		  $cellContent .= $form_state['storage']['crmlist'][$col][$row];
+		  $objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
+		}
+              } // end if
+    	    } // End row for loop
+    	    $fCol++;
+	  break;
+	  case 7: // Address
+	    // Fill in the first row (item name) first				
+	    $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'city');
+            $objWorksheet->setCellValueByColumnAndRow($fCol  , 1, 'region');
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, 'zip code(3 digits)');
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, 'zip code(2 digits)');
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+3, 1, 'street');
 
-		for ($col = 0; $col <= $colNum; ++$col) {
-			$index = 301 + $col;
-			$item = $form_state['values'][$index]; // $item: 0:Nothing; 1:Name; 2:Email; 3:B-day; 4:mobil; 5:phones; 6:ID#; 7:Address 
-			if ($item > 0) // User doesn select at least one item			
-			{
-				$fCol++;
+	    for ($row = 2; $row <= $rowNum; ++$row){
+	      if (!empty($form_state['storage']['crmlist'][$col][$row])){ // make sure the cell is not empty
+	        $cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
 
-				switch($item) {
-	      				case 1:	// Name		
-						// Fill in the first row (item name) first				
-						$objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'Family name');
-						$objWorksheet->setCellValueByColumnAndRow($fCol, 1, 'First name');			
-						for ($row = 2; $row <= $rowNum; ++$row){
-							$cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
-							if ($cellContent){
-								$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent[0]);
-								$objWorksheet->setCellValueByColumnAndRow($fCol, $row, $cellContent[1]);
-							}
-							else{ // If input data is empty or wrong
-								$cellContent = 'empty or error:';
-								$cellContent .= $form_state['storage']['crmlist'][$col][$row];
-								$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
-							}
-						} // End row for loop
-						$fCol++;
-					break;
-					case 7: // Address
-						// Fill in the first row (item name) first				
-						$objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'city');
-						$objWorksheet->setCellValueByColumnAndRow($fCol  , 1, 'region');
-						$objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, 'zip code(3 digits)');
-						$objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, 'zip code(2 digits)');
-						$objWorksheet->setCellValueByColumnAndRow($fCol+3, 1, 'street');
+		$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent['city']);
+		$objWorksheet->setCellValueByColumnAndRow($fCol, $row, $cellContent['region']);
 
-						for ($row = 2; $row <= $rowNum; ++$row){
-							$cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
-							
-							
-							$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent['city']);
-							$objWorksheet->setCellValueByColumnAndRow($fCol, $row, $cellContent['region']);
-						
-							if (is_array($cellContent['zip'])) // 5-digit zip code
-							{
-								$objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']['0']);
-								$objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, $cellContent['zip']['1']);
-							}
-							else // 3-digit zip code
-							{
-								$objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']);
-								$objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, '');
-							}
-							$objWorksheet->setCellValueByColumnAndRow($fCol+3, $row, $cellContent['street']);
-						
-						} // End row for loop
-						$fCol = $fCol + 5;
-					break;
-					default:
-						// Fill in the first row(item name) first
-						$objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, $form_state['storage']['crmlist'][$col][1]);
-						for ($row = 2; $row <= $rowNum; ++$row){
-							$cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
-							if ($cellContent){
-								$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
-							}
-							else{ // if input data is wrong...
-								$cellContent = 'empty or error:';
-								$cellContent .= $form_state['storage']['crmlist'][$col][$row];
-								$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
-							}
-							//$objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
-						} // End row for loop
+		if (is_array($cellContent['zip'])){ // 5-digit zip code
+	          $objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']['0']);
+	          $objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, $cellContent['zip']['1']);
+		}
+		else{ // 3-digit zip code
+	          $objWorksheet->setCellValueByColumnAndRow($fCol+1, $row, $cellContent['zip']);
+ 	          $objWorksheet->setCellValueByColumnAndRow($fCol+2, $row, '');
+		}
+		$objWorksheet->setCellValueByColumnAndRow($fCol+3, $row, $cellContent['street']);
+	      }// end if						
+	    } // End row for loop
+	    $fCol = $fCol + 5;
+          break;
+          default:
+	    // Fill in the first row(item name) first
+	    $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, $form_state['storage']['crmlist'][$col][1]);
+	    for ($row = 2; $row <= $rowNum; ++$row){
+              if (!empty($form_state['storage']['crmlist'][$col][$row])){ // make sure the cell is not empty
+		$cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
+		if ($cellContent){
+	          $objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
+		}
+	        else{ // if input data is wrong...
+		  $cellContent = '@ERR-';
+ 		  $cellContent .= $form_state['storage']['crmlist'][$col][$row];
+		  $objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $cellContent);
+	        }
+	      }
+	    } // End row for loop
+          break;
+	} // End switch
+      } // End if
+    } // End column for loop
 
-					break;
-				} // End switch
-			} // End if
-	   	} // End column for loop
+    // Redirect output to a client’s web browser (Excel5)
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="civicrm_Contactlist.xls"');
+    header('Cache-Control: max-age=0');
 
-		// Write to the Excel file
-/*	      	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-	      	$objWriter->save(str_replace('.module', '.xlsx', __FILE__));*/
-
-		// Redirect output to a client’s web browser (Excel5)
-		header('Content-Type: application/vnd.ms-excel');
-		header('Content-Disposition: attachment;filename="civicrm_Contactlist.xls"');
-		header('Cache-Control: max-age=0');
-
-		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-		$objWriter->save('php://output');
-		exit;
-	} // End if--step = 3
-	return true;
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+    $objWriter->save('php://output');
+    //exit;
+  } // End if--step = 3
+  return true;
 }
 
 // input:$form_state['storage']['crmlist'][$col] : one column
 // output: 1-D array or multi-D array(for name & address)
 function ValidateCustomerData($item, $colCustomer){
-	switch ($item)
-	{
-		case 1:		
-			$Content = cvalidate_name($colCustomer);	
-		break;
-		case 2:
-			$Content = cvalidate_email($colCustomer);				
-		break;
-		case 3:
-			$Content = cvalidate_birthday($colCustomer);	
-		break;
-		case 4:
-			$Content = cvalidate_mobile($colCustomer);	
-		break;
-		case 5:
-			$Content = cvalidate_telephone($colCustomer);	
-		break;
-		case 6:
-			$Content = cvalidate_pid($colCustomer);	
-		break;	
-		case 7:
-			$Content = cvalidate_address($colCustomer);
-		break;
-		default:
-			dpm('No way!!!!');
-		break;		
-
-	} // End switch
-	return $Content;
+  switch ($item)
+  {
+    case 1:		
+      $Content = cvalidate_name($colCustomer);	
+    break;
+    case 2:
+      $Content = cvalidate_email($colCustomer);				
+    break;
+    case 3:
+      $Content = cvalidate_birthday($colCustomer);	
+    break;
+    case 4:
+      $Content = cvalidate_mobile($colCustomer);	
+    break;
+    case 5:
+      $Content = cvalidate_telephone($colCustomer);	
+    break;
+    case 6:
+      $Content = cvalidate_pid($colCustomer);	
+    break;	
+    case 7:
+      $Content = cvalidate_address($colCustomer);
+    break;
+    default:
+      dpm('No way!!!!');
+    break;		
+  } // End switch
+  return $Content;
 }
