@@ -196,10 +196,15 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
     for ($col = 0; $col <= $colNum; ++$col) {
       $index = $col + 1;
       $item = $form_state['values']['select_'.$index]; // $item: 0:Nothing; 1:Name; 2:Email; 3:B-day; 4:mobil; 5:phones; 6:ID#; 7:Address 
-      if ($item > 0){ // User does select at least one item			
-        $fCol++;
+      $fCol++;
 
         switch($item) {
+          case 0: // When user didn´t select the category
+	    for ($row = 1; $row <= $rowNum; ++$row){
+	      if (!empty($form_state['storage']['crmlist'][$col][$row])) // make sure the cell is not empty 
+	        $objWorksheet->setCellValueByColumnAndRow($fCol-1, $row, $form_state['storage']['crmlist'][$col][$row]);
+	    }
+	  break;
           case 1:	// Name		
             // Fill in the first row (item name) first				
             $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'Family name');
@@ -268,7 +273,7 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 	    } // End row for loop
           break;
 	} // End switch
-      } // End if
+      //} // End if
     } // End column for loop
 
     // Redirect output to a client’s web browser (Excel5)
