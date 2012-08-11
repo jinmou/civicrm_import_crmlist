@@ -17,12 +17,12 @@ function cvalidate_name($str) {
   if (preg_match("/[a-zA-Z]/", $str)) { // check for english name
     if (preg_match("/[,]/", $str)) { // has comma will be reverse
       // $name = array_reverse(preg_split("/[\s,]+/", $str));
-      $name = explode(',', $str);	
+      $name = explode(',', $str);
     }
     else { // has space
       $name = array_reverse(preg_split("/[\s,]+/", $str));
     }
-    
+
   }
   else { // check for chinese name
     $str = _cvalidate_filter($str);
@@ -172,7 +172,7 @@ function cvalidate_pid($pid) {
 }
 
 /**
- * Talk to Google Maps and return a json of address. 
+ * Talk to Google Maps and return a json of address.
  * @see https://developers.google.com/maps/documentation/geocoding/#GeocodingResponses
  */
 function cvalidate_address($full_address) {
@@ -180,15 +180,15 @@ function cvalidate_address($full_address) {
   if (empty($full_address)) {
     return FALSE;
   }
+  // get json file from google maps api
   $address = urlencode($full_address);
   $json = file_get_contents('http://maps.googleapis.com/maps/api/geocode/json?address=' . $address . '&sensor=true&language=zh-TW');
   $r = json_decode($json)->results;
+
+  // if result more than one, it is meant blur from the input.
   if (count($r) > 1) {
     return FALSE;
   }
-  $data = $r[0]->address_components;
-  $returns['city'] = $data['4']->long_name;
-  $returns['region'] = $data['3']->long_name;
 
   // if count zip 5 will separate to 3 + 2
   if (preg_match("/^[0-9]{5}/", $full_address)) {
@@ -198,12 +198,16 @@ function cvalidate_address($full_address) {
   else {
     $returns['zip'] = $data['6']->long_name;
   }
+
+  $data = $r[0]->address_components;
+  // start to process address from google maps api.
+  $returns['city'] = $data['4']->long_name;
+  $returns['region'] = $data['3']->long_name;
   $returns['street'] = $data['1']->long_name;
-  foreach ($returns as $item) {
-    if (empty($item)) {
-      return FALSE;
-    }
-  }
+  $returns['street_number'] = $data['0']->long_name . '號';
+  $floor = explode($returns['street_number'], $full_address, 2);
+  $returns['floor'] = $floor[1];
+
   return $returns;
 }
 
