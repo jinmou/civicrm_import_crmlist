@@ -192,21 +192,42 @@ function cvalidate_address($full_address) {
 
   // if count zip 5 will separate to 3 + 2
   if (preg_match("/^[0-9]{5}/", $full_address)) {
-    $returns['zip']['0'] = substr($full_address, 0, 3);
-    $returns['zip']['1'] = substr($full_address, 3, 2);
+    $returns['zip'][0] = substr($full_address, 0, 3);
+    $returns['zip'][1] = substr($full_address, 3, 2);
   }
   else {
-    $returns['zip'] = $data['6']->long_name;
+    $returns['zip'] = $r[0]->address_components[6]->long_name;
   }
 
-  $data = $r[0]->address_components;
   // start to process address from google maps api.
-  $returns['city'] = $data['4']->long_name;
-  $returns['region'] = $data['3']->long_name;
-  $returns['street'] = $data['1']->long_name;
-  $returns['street_number'] = $data['0']->long_name . '號';
-  $floor = explode($returns['street_number'], $full_address, 2);
-  $returns['floor'] = $floor[1];
+  foreach ($r[0]->address_components as $item) {
+    $temp_returns[$item->types[0]] = $item->long_name;
+  }
+
+  $returns['city'] = $temp_returns['administrative_area_level_2'];
+  $returns['region'] = $temp_returns['locality'];
+  $returns['street'] = $temp_returns['route'];
+
+  // processing alley
+  preg_match('/[0-9]{1,}巷/', $full_address, $alley);
+
+  // processing lane
+  preg_match('/[0-9]{1,}弄/', $full_address, $lane);
+
+  // processing lane
+  preg_match('/[0-9]{1,}號/', $full_address, $street_number);
+
+  // processing floor
+  preg_match('/[0-9]{1,}樓/', $full_address, $floor);
+
+  // processing room
+  preg_match('/[0-9-0-9]{1,}室/', $full_address, $room);
+
+  // replace all matches to prevent repeat happen
+  $patterns[0] = '/' . $alley[0] . '/';
+  $patterns[1] = '/' . $lane[0] . '/';
+  $patterns[2] = '/' . $street_number[0] . '/';
+  $returns['street'] = preg_replace($patterns, '', $returns['street']) . $alley[0] . $lane[0] . $street_number[0] . $floor[0] . $room[0];
 
   return $returns;
 }
