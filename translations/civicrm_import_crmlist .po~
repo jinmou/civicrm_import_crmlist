@@ -1,0 +1,129 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  civicrm_import_crmlist.module: n/a
+#  civicrm_import_crmlist.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-08-14 17:00+0800\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: civicrm_import_crmlist.module:44
+msgid "List Validation"
+msgstr "檢核名單"
+
+#: civicrm_import_crmlist.module:59
+msgid "STEP1:"
+msgstr "步驟一"
+
+#: civicrm_import_crmlist.module:63
+msgid "Upload"
+msgstr "上傳"
+
+#: civicrm_import_crmlist.module:64
+msgid "Upload your excel(xls/xlsx) file here."
+msgstr "在此上傳您的excel檔案(.xls/.xlsx)"
+
+#: civicrm_import_crmlist.module:69
+msgid "Import"
+msgstr "匯入"
+
+#: civicrm_import_crmlist.module:75
+msgid "STEP2:"
+msgstr "步驟二"
+
+#: civicrm_import_crmlist.module:79
+msgid "Item name"
+msgstr "項目"
+
+#: civicrm_import_crmlist.module:79
+msgid "First row"
+msgstr "第一列"
+
+#: civicrm_import_crmlist.module:79
+msgid "Choose the category"
+msgstr "選擇檢核項目"
+
+#: civicrm_import_crmlist.module:86
+msgid "No action"
+msgstr "無"
+
+#: civicrm_import_crmlist.module:87
+msgid "Name"
+msgstr "姓名"
+
+#: civicrm_import_crmlist.module:88
+msgid "Email"
+msgstr "電子郵件"
+
+#: civicrm_import_crmlist.module:89
+msgid "BirthDay"
+msgstr "生日"
+
+#: civicrm_import_crmlist.module:90
+msgid "Mobil"
+msgstr "手機號碼"
+
+#: civicrm_import_crmlist.module:91
+msgid "Telephone"
+msgstr "電話號碼"
+
+#: civicrm_import_crmlist.module:92
+msgid "Personal ID"
+msgstr "身份證字號"
+
+#: civicrm_import_crmlist.module:93
+msgid "Address"
+msgstr "住址"
+
+#: civicrm_import_crmlist.module:110
+msgid "Confirm"
+msgstr "確認"
+
+#: civicrm_import_crmlist.module:210
+msgid "Family name"
+msgstr "姓"
+
+#: civicrm_import_crmlist.module:211
+msgid "First name"
+msgstr "名"
+
+#: civicrm_import_crmlist.module:232
+msgid "city"
+msgstr "城市"
+
+#: civicrm_import_crmlist.module:233
+msgid "region"
+msgstr "地區地區地區"
+
+#: civicrm_import_crmlist.module:234
+msgid "zip code(3 digits)"
+msgstr "郵遞區號(前三碼)"
+
+#: civicrm_import_crmlist.module:235
+msgid "zip code(2 digits)"
+msgstr "郵遞區號(後二碼)"
+
+#: civicrm_import_crmlist.module:236
+msgid "street"
+msgstr "街道"
+
+#: civicrm_import_crmlist.module:20 civicrm_import_crmlist.info:0
+msgid "civicrm_import_crmlist"
+msgstr ""
+
+#: civicrm_import_crmlist.info:0
+msgid "Validate member list"
+msgstr "檢核會員名單"
+

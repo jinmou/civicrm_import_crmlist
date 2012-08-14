@@ -1,0 +1,129 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  civicrm_import_crmlist.module: n/a
+#  civicrm_import_crmlist.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-08-14 17:00+0800\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: civicrm_import_crmlist.module:44
+msgid "List Validation"
+msgstr ""
+
+#: civicrm_import_crmlist.module:59
+msgid "STEP1:"
+msgstr ""
+
+#: civicrm_import_crmlist.module:63
+msgid "Upload"
+msgstr ""
+
+#: civicrm_import_crmlist.module:64
+msgid "Upload your excel(xls/xlsx) file here."
+msgstr ""
+
+#: civicrm_import_crmlist.module:69
+msgid "Import"
+msgstr ""
+
+#: civicrm_import_crmlist.module:75
+msgid "STEP2:"
+msgstr ""
+
+#: civicrm_import_crmlist.module:79
+msgid "Item name"
+msgstr ""
+
+#: civicrm_import_crmlist.module:79
+msgid "First row"
+msgstr ""
+
+#: civicrm_import_crmlist.module:79
+msgid "Choose the category"
+msgstr ""
+
+#: civicrm_import_crmlist.module:86
+msgid "No action"
+msgstr ""
+
+#: civicrm_import_crmlist.module:87
+msgid "Name"
+msgstr ""
+
+#: civicrm_import_crmlist.module:88
+msgid "Email"
+msgstr ""
+
+#: civicrm_import_crmlist.module:89
+msgid "BirthDay"
+msgstr ""
+
+#: civicrm_import_crmlist.module:90
+msgid "Mobil"
+msgstr ""
+
+#: civicrm_import_crmlist.module:91
+msgid "Telephone"
+msgstr ""
+
+#: civicrm_import_crmlist.module:92
+msgid "Personal ID"
+msgstr ""
+
+#: civicrm_import_crmlist.module:93
+msgid "Address"
+msgstr ""
+
+#: civicrm_import_crmlist.module:110
+msgid "Confirm"
+msgstr ""
+
+#: civicrm_import_crmlist.module:210
+msgid "Family name"
+msgstr ""
+
+#: civicrm_import_crmlist.module:211
+msgid "First name"
+msgstr ""
+
+#: civicrm_import_crmlist.module:232
+msgid "city"
+msgstr ""
+
+#: civicrm_import_crmlist.module:233
+msgid "region"
+msgstr ""
+
+#: civicrm_import_crmlist.module:234
+msgid "zip code(3 digits)"
+msgstr ""
+
+#: civicrm_import_crmlist.module:235
+msgid "zip code(2 digits)"
+msgstr ""
+
+#: civicrm_import_crmlist.module:236
+msgid "street"
+msgstr ""
+
+#: civicrm_import_crmlist.module:20 civicrm_import_crmlist.info:0
+msgid "civicrm_import_crmlist"
+msgstr ""
+
+#: civicrm_import_crmlist.info:0
+msgid "Validate member list"
+msgstr ""
+
