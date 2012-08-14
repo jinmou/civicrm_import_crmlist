@@ -41,7 +41,7 @@ function civicrm_import_crmlist_theme() {
 
 
 function civicrm_import_crmlist_settings($form_state){  
-  drupal_set_title('List Validation');
+  drupal_set_title(t('List Validation'));
 
   if (!$form_state['storage']['step']) 
     $form_state['storage']['step'] = 1;
@@ -56,7 +56,7 @@ function civicrm_import_crmlist_settings($form_state){
       // jinmou: important! ==> to get uploaded file info.
       $form['#attributes'] = array('enctype' => "multipart/form-data");
 
-      $form['step1']['#value'] = '<font size="2">STEP1:</font>';
+      $form['step1']['#value'] = '<font size="2">'.t('STEP1:').'</font>';
 
       $form['upload'] = array(
         '#type' => 'file',
@@ -72,25 +72,25 @@ function civicrm_import_crmlist_settings($form_state){
     break;
 
     case 2:
-      $form['step2']['#value'] = '<font size="2">STEP2:</font>';
+      $form['step2']['#value'] = '<font size="2">'.t('STEP2:').'</font>';
       //$form_state['storage']['crmlist']
       $highestCol = $form_state['storage']['ColNum'];
       $index = 0;
-      $form['title'.$index]['#value'] = '<table border=3><tr bgcolor=#cbf1bf align=center valign=center><td>Item name</td><td>First row</td><td>Choose the category</td></tr>';
+      $form['title'.$index]['#value'] = '<table border=3><tr bgcolor=#cbf1bf align=center valign=center><td>'.t('Item name').'</td><td>'.t('First row').'</td><td>'.t('Choose the category').'</td></tr>';
 
       for ($index = 1; $index <= $highestCol; ++$index) {
         $form['item_'.$index]['#value'] = '<tr align=center valign=center><td>'.$form_state['storage']['crmlist'][$index-1][1].'</td>';
 
         $form['firstrow_'.$index]['#value'] = '<td>'.$form_state['storage']['crmlist'][$index-1][2].'</td>';
  
-	$schemes = array('No action',
-     	  'Name',
-     	  'Email',
-     	  'BirthDay',
-	  'Mobil',
-	  'Telephone',	
-	  'Personal ID',			
-	  'Address',	
+	$schemes = array(t('No action'),
+     	  t('Name'),
+     	  t('Email'),
+     	  t('BirthDay'),
+	  t('Mobil'),
+	  t('Telephone'),	
+	  t('Personal ID'),			
+	  t('Address'),	
 	  );
 
 	// ´select´ form
@@ -207,8 +207,8 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 	  break;
           case 1:	// Name		
             // Fill in the first row (item name) first				
-            $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'Family name');
-	    $objWorksheet->setCellValueByColumnAndRow($fCol, 1, 'First name');			
+            $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, t('Family name'));
+	    $objWorksheet->setCellValueByColumnAndRow($fCol, 1, t('First name'));			
 	    for ($row = 2; $row <= $rowNum; ++$row){
 	      $cellContent = ValidateCustomerData($item, $form_state['storage']['crmlist'][$col][$row]);
 	      if (!empty($form_state['storage']['crmlist'][$col][$row])){ // make sure the cell is not empty
@@ -229,11 +229,11 @@ function civicrm_import_crmlist_settings_submit($form, &$form_state){
 	  break;
 	  case 7: // Address
 	    // Fill in the first row (item name) first				
-	    $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, 'city');
-            $objWorksheet->setCellValueByColumnAndRow($fCol  , 1, 'region');
-	    $objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, 'zip code(3 digits)');
-	    $objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, 'zip code(2 digits)');
-	    $objWorksheet->setCellValueByColumnAndRow($fCol+3, 1, 'street');
+	    $objWorksheet->setCellValueByColumnAndRow($fCol-1, 1, t('city'));
+            $objWorksheet->setCellValueByColumnAndRow($fCol  , 1, t('region'));
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+1, 1, t('zip code(3 digits)'));
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+2, 1, t('zip code(2 digits)'));
+	    $objWorksheet->setCellValueByColumnAndRow($fCol+3, 1, t('street'));
 
 	    for ($row = 2; $row <= $rowNum; ++$row){
 	      if (!empty($form_state['storage']['crmlist'][$col][$row])){ // make sure the cell is not empty

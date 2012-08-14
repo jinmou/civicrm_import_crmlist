@@ -1,5 +1,5 @@
 name = civicrm_import_crmlist
-description = Support to import CiviCRM contact 
+description = Validate member list 
 core = 6.x
 version = 6.x-1.0
 dependencies[] = civicrm
